@@ -14,18 +14,20 @@ class QuizWidget extends StatelessWidget {
       child: ListTile(
         title: Text(quiz.name),
         subtitle: Text('Liczba pytań: ${quiz.questionNum}'),
-        leading: quiz.type == QuizType.oneAnswer
-            ? const Icon(Icons.draw)
-            : const Icon(Icons.list),
         trailing: quiz.withTime
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [const Icon(Icons.timelapse), Text('${quiz.time} s')],
               )
             : null,
-        onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (context) => QuizScreen(quiz: quiz)))
-            .then((value) async => getQuizes()),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => QuizScreen(
+              id: quiz.id!,
+            ),
+          ),
+        ).then((value) async => getQuizes()),
       ),
     );
   }

@@ -1,10 +1,10 @@
-// ignore_for_file: unnecessary_new
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/question_model.dart';
 import 'package:quiz_app/models/quiz_model.dart';
+import 'package:quiz_app/screens/types_of_quiz.dart/one_answer.dart';
+import 'package:quiz_app/screens/types_of_quiz.dart/true_or_false.dart';
 
 class Quiz extends StatefulWidget {
   final List<QuestionModel> questionList;
@@ -17,27 +17,38 @@ class Quiz extends StatefulWidget {
 
 class _QuizState extends State<Quiz> {
   TextEditingController answerController = TextEditingController();
+  bool finish = false;
   int number = 0;
   int score = 0;
-  bool finish = false;
   late int time;
+  Timer? _timer;
+  late List<QuestionModel> questionList;
 
   @override
   void initState() {
-    super.initState();
     startTimer();
+    questionList = widget.questionList;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   void startTimer() {
+    _timer?.cancel();
     const oneSec = Duration(seconds: 1);
     time = widget.quiz.time;
-    Timer.periodic(
+    _timer = Timer.periodic(
       oneSec,
       (Timer timer) {
         if (time == 0) {
           setState(() {
             timer.cancel();
-            check();
+            _timer?.cancel();
+            check(false);
           });
         } else {
           setState(() {
@@ -48,10 +59,29 @@ class _QuizState extends State<Quiz> {
     );
   }
 
+  void check(bool isCorrect) {
+    if (isCorrect == true) {
+      setState(() {
+        score += 1;
+        number += 1;
+        startTimer();
+      });
+    } else if (isCorrect == false) {
+      setState(() {
+        number += 1;
+        startTimer();
+      });
+    }
+    if (number == widget.quiz.questionNum) {
+      setState(() {
+        _timer?.cancel();
+        finish = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<QuestionModel> questionList = widget.questionList;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quiz'),
@@ -70,36 +100,20 @@ class _QuizState extends State<Quiz> {
                 children: [
                   Text('Time: $time'),
                   Text('punkty: $score'),
-                  Text(questionList[number].question),
-                  TextField(
-                    controller: answerController,
-                  ),
-                  ElevatedButton(
-                      onPressed: () => check(), child: const Text('Sprawdź'))
+                  questionList[number].type == QuestionType.oneAnswer
+                      ? OneAnswer(
+                          quiz: questionList[number],
+                          check: (val) => check(val),
+                          answerController: answerController,
+                        )
+                      : questionList[number].type == QuestionType.trueOrFalse
+                          ? TrueOrFalse(
+                              quiz: questionList[number],
+                              check: (val) => check(val))
+                          : Text('nul')
                 ],
               ),
       ),
     );
-  }
-
-  check() {
-    if (answerController.text == widget.questionList[number].answer) {
-      setState(() {
-        number += 1;
-        score += 1;
-        startTimer();
-      });
-    } else {
-      setState(() {
-        number += 1;
-        startTimer();
-      });
-    }
-    if (number == widget.questionList.length) {
-      setState(() {
-        finish = true;
-      });
-    }
-    answerController.text = '';
   }
 }

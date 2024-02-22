@@ -12,7 +12,6 @@ class _AddQuizScreenState extends State<AddQuizScreen> {
   TextEditingController titleController = TextEditingController();
   TextEditingController numController = TextEditingController();
   bool withTime = false;
-  QuizType? type = QuizType.oneAnswer;
 
   @override
   Widget build(BuildContext context) {
@@ -40,27 +39,6 @@ class _AddQuizScreenState extends State<AddQuizScreen> {
               ],
             ),
           ),
-          const Text('Wybierz typ quizu:'),
-          ListTile(
-            title: const Text('Typ jednej odpowiedzi'),
-            trailing: Radio(
-              value: QuizType.oneAnswer,
-              groupValue: type,
-              onChanged: (QuizType? value) => setState(() {
-                type = value;
-              }),
-            ),
-          ),
-          ListTile(
-            title: const Text('Typ kilku odpowiedzi'),
-            trailing: Radio(
-              value: QuizType.multiAnswers,
-              groupValue: type,
-              onChanged: (QuizType? value) => setState(() {
-                type = value;
-              }),
-            ),
-          ),
           ListTile(
             title: const Text('Czy quiz ma być na czas?'),
             trailing: Switch(
@@ -80,7 +58,6 @@ class _AddQuizScreenState extends State<AddQuizScreen> {
     QuizModel quiz = QuizModel(
         name: titleController.text,
         questionNum: 0,
-        type: type!,
         withTime: withTime,
         time: int.tryParse(numController.text) ?? 0);
     DbHelper().insertQuiz(quiz);

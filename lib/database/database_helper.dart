@@ -10,14 +10,18 @@ class DbHelper {
   final String quizList = 'quizlist';
   final String name = 'name';
   final String questionNum = 'questionnum';
-  final String type = 'type';
   final String withTime = 'withtime';
   final String time = 'time';
 
   final String questionList = 'questionlist';
   final String idQuiz = 'idquiz';
+  final String type = 'type';
   final String question = 'question';
-  final String answer = 'answer';
+  final String answerBool = 'truefalse';
+  final String correctAnswer = 'answer';
+  final String answer2 = 'answer2';
+  final String answer3 = 'answer3';
+  final String answer4 = 'answer4';
 
   late Database _db;
 
@@ -33,7 +37,6 @@ class DbHelper {
             $id INTEGER PRIMARY KEY,
             $name TEXT NOT NULL,
             $questionNum INTEGER NOT NULL,
-            $type TEXT NOT NULL,
             $withTime INTEGER NOT NULL,
             $time INTEGER NOT NULL
           )
@@ -42,8 +45,13 @@ class DbHelper {
           CREATE TABLE $questionList (
             $id INTEGER PRIMARY KEY,
             $idQuiz INTEGER NOT NULL,
+            $type TEXT NOT NULL,
             $question TEXT NOT NULL,
-            $answer TEXT NOT NULL
+            $answerBool INTEGER,
+            $correctAnswer TEXT,
+            $answer2 TEXT,
+            $answer3 TEXT,
+            $answer4 TEXT
           )
           ''');
   }
@@ -53,7 +61,7 @@ class DbHelper {
     Map<String, dynamic> row = {
       name: quiz.name,
       questionNum: quiz.questionNum,
-      type: quiz.type == QuizType.oneAnswer ? 'oneAnswer' : 'multiAnswers',
+      // type: quiz.type == QuizType.oneAnswer ? 'oneAnswer' : 'multiAnswers',
       withTime: quiz.withTime ? 1 : 0,
       time: quiz.time
     };
@@ -70,14 +78,27 @@ class DbHelper {
           id: element[id],
           name: element[name],
           questionNum: element[questionNum],
-          type: element[type] == 'oneAnswer'
-              ? QuizType.oneAnswer
-              : QuizType.multiAnswers,
           withTime: element[withTime] == 1 ? true : false,
           time: element[time]);
       quizes.add(quiz);
     }
     return quizes;
+  }
+
+  Future<QuizModel> queryQuiz(int passId) async {
+    await init();
+    List listRow = await _db.query(
+      quizList,
+      where: '"_id" = ?',
+      whereArgs: [passId],
+    );
+    QuizModel quiz = QuizModel(
+        id: listRow[0][id],
+        name: listRow[0][name],
+        questionNum: listRow[0][questionNum],
+        withTime: listRow[0][withTime] == 1 ? true : false,
+        time: listRow[0][time]);
+    return quiz;
   }
 
   Future<int> deleteQuiz(int passId) async {
@@ -98,8 +119,14 @@ class DbHelper {
   Future<int> insertQuestion(QuestionModel quest) async {
     Map<String, dynamic> row = {
       idQuiz: quest.idQuiz,
+      type: quest.type == QuestionType.oneAnswer
+          ? 'oneAnswer'
+          : quest.type == QuestionType.trueOrFalse
+              ? 'trueOrFalse'
+              : 'multiAnswers',
       question: quest.question,
-      answer: quest.answer,
+      answerBool: quest.answerBool == true ? 1 : 0,
+      correctAnswer: quest.correctAnswer,
     };
     await init();
     List num = await _db.query(
@@ -121,13 +148,19 @@ class DbHelper {
     await init();
     List listRow = await _db
         .query(questionList, where: '$idQuiz = ?', whereArgs: [passId]);
-    List<QuestionModel> questions = [];
+    List<QuestionModel> questions = []; //zamienić na .map
     for (var element in listRow) {
       final quiz = QuestionModel(
         id: element[id],
         idQuiz: element[idQuiz],
+        type: element[type] == 'oneAnswer'
+            ? QuestionType.oneAnswer
+            : element[type] == 'trueOrFalse'
+                ? QuestionType.trueOrFalse
+                : QuestionType.multiAnswers,
+        answerBool: element[answerBool] == 1 ? true : false,
         question: element[question],
-        answer: element[answer],
+        correctAnswer: element[correctAnswer],
       );
       questions.add(quiz);
     }
