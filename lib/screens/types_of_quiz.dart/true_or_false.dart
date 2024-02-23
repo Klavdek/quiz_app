@@ -13,7 +13,7 @@ class TrueOrFalse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _check(bool isCorrect) {
+    void _check(bool isCorrect) {
       if (isCorrect == quiz.answerBool) {
         check(true);
       } else {
@@ -25,6 +25,7 @@ class TrueOrFalse extends StatelessWidget {
       children: [
         Text(quiz.question),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             ElevatedButton(
               onPressed: () => _check(true),

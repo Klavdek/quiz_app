@@ -28,10 +28,10 @@ class DbHelper {
   Future<void> init() async {
     final documentesDirectory = await getDatabasesPath();
     final databasePath = join(documentesDirectory, databaseName);
-    _db = await openDatabase(databasePath, onCreate: onCreate, version: 1);
+    _db = await openDatabase(databasePath, onCreate: _onCreate, version: 1);
   }
 
-  Future onCreate(Database db, int version) async {
+  Future _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $quizList (
             $id INTEGER PRIMARY KEY,
@@ -127,6 +127,9 @@ class DbHelper {
       question: quest.question,
       answerBool: quest.answerBool == true ? 1 : 0,
       correctAnswer: quest.correctAnswer,
+      answer2: quest.answer2,
+      answer3: quest.answer3,
+      answer4: quest.answer4
     };
     await init();
     List num = await _db.query(
@@ -161,6 +164,9 @@ class DbHelper {
         answerBool: element[answerBool] == 1 ? true : false,
         question: element[question],
         correctAnswer: element[correctAnswer],
+        answer2: element[answer2],
+        answer3: element[answer3],
+        answer4: element[answer4],
       );
       questions.add(quiz);
     }

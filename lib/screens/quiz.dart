@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/question_model.dart';
 import 'package:quiz_app/models/quiz_model.dart';
+import 'package:quiz_app/screens/types_of_quiz.dart/multi_answers.dart';
 import 'package:quiz_app/screens/types_of_quiz.dart/one_answer.dart';
 import 'package:quiz_app/screens/types_of_quiz.dart/true_or_false.dart';
 
@@ -110,7 +111,10 @@ class _QuizState extends State<Quiz> {
                           ? TrueOrFalse(
                               quiz: questionList[number],
                               check: (val) => check(val))
-                          : Text('nul')
+                          : MultiAnswers(
+                              quiz: questionList[number],
+                              check: (val) => check(val),
+                            )
                 ],
               ),
       ),

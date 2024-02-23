@@ -15,7 +15,7 @@ class OneAnswer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _check() {
+    void _check() {
       if (answerController.text == quiz.correctAnswer) {
         check(true);
       } else {

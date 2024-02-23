@@ -16,6 +16,13 @@ class _AddQuestionState extends State<AddQuestion> {
   TextEditingController answerController = TextEditingController();
   QuestionType? type = QuestionType.oneAnswer;
   bool answerBool = false;
+  int number = 1;
+  List<TextEditingController> listControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +47,16 @@ class _AddQuestionState extends State<AddQuestion> {
           title: const Text('Typ prawda fałsz'),
           trailing: Radio(
             value: QuestionType.trueOrFalse,
+            groupValue: type,
+            onChanged: (QuestionType? value) => setState(() {
+              type = value;
+            }),
+          ),
+        ),
+        ListTile(
+          title: const Text('Typ kilku odpowiedzi'),
+          trailing: Radio(
+            value: QuestionType.multiAnswers,
             groupValue: type,
             onChanged: (QuestionType? value) => setState(() {
               type = value;
@@ -79,7 +96,33 @@ class _AddQuestionState extends State<AddQuestion> {
                       ),
                     ),
                   ])
-                : const Text('jeszcze nie ma'),
+                : Column(
+                    children: [
+                      ListView.builder(
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) => index == 0
+                            ? TextField(
+                                controller: listControllers[index],
+                                decoration: const InputDecoration(
+                                  label: Text('Wpisz poprawną odpowiedź'),
+                                ),
+                              )
+                            : TextField(
+                                controller: listControllers[index],
+                                decoration: const InputDecoration(
+                                  label: Text('Wpisz błędną odpowiedź'),
+                                ),
+                              ),
+                        itemCount: number,
+                      ),
+                      ElevatedButton(
+                        onPressed: () => setState(() {
+                          number += 1;
+                        }),
+                        child: const Icon(Icons.add),
+                      )
+                    ],
+                  ),
         OutlinedButton(
           onPressed: () async => saveQuestion(),
           child: const Text('Dodaj'),
@@ -94,7 +137,12 @@ class _AddQuestionState extends State<AddQuestion> {
       type: type!,
       question: questionController.text,
       answerBool: answerBool,
-      correctAnswer: answerController.text,
+      correctAnswer: type == QuestionType.oneAnswer
+          ? answerController.text
+          : listControllers[0].text,
+      answer2: listControllers[1].text,
+      answer3: listControllers[2].text,
+      answer4: listControllers[3].text,
     );
     await DbHelper()
         .insertQuestion(question)
