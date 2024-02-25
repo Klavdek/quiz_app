@@ -10,20 +10,23 @@ import 'package:quiz_app/screens/types_of_quiz.dart/true_or_false.dart';
 class Quiz extends StatefulWidget {
   final List<QuestionModel> questionList;
   final QuizModel quiz;
-  const Quiz({super.key, required this.questionList, required this.quiz});
+  const Quiz({
+    super.key,
+    required this.questionList,
+    required this.quiz,
+  });
 
   @override
   State<Quiz> createState() => _QuizState();
 }
 
 class _QuizState extends State<Quiz> {
-  TextEditingController answerController = TextEditingController();
   bool finish = false;
+  late List<QuestionModel> questionList;
   int number = 0;
   int score = 0;
-  late int time;
   Timer? _timer;
-  late List<QuestionModel> questionList;
+  late ValueNotifier<int> _counter;
 
   @override
   void initState() {
@@ -39,22 +42,17 @@ class _QuizState extends State<Quiz> {
   }
 
   void startTimer() {
+    _counter = ValueNotifier<int>(widget.quiz.time);
     _timer?.cancel();
     const oneSec = Duration(seconds: 1);
-    time = widget.quiz.time;
     _timer = Timer.periodic(
       oneSec,
       (Timer timer) {
-        if (time == 0) {
-          setState(() {
-            timer.cancel();
-            _timer?.cancel();
-            check(false);
-          });
+        if (_counter.value == 0) {
+          check(false);
         } else {
-          setState(() {
-            time--;
-          });
+          _counter.value--;
+          print(_counter.value);
         }
       },
     );
@@ -75,8 +73,8 @@ class _QuizState extends State<Quiz> {
     }
     if (number == widget.quiz.questionNum) {
       setState(() {
-        _timer?.cancel();
         finish = true;
+        _timer?.cancel();
       });
     }
   }
@@ -99,13 +97,23 @@ class _QuizState extends State<Quiz> {
               )
             : Column(
                 children: [
-                  Text('Time: $time'),
+                  ValueListenableBuilder<int>(
+                    builder: (BuildContext context, int value, Widget? child) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text('$value'),
+                        ],
+                      );
+                    },
+                    valueListenable: _counter,
+                    child: null,
+                  ),
                   Text('punkty: $score'),
                   questionList[number].type == QuestionType.oneAnswer
                       ? OneAnswer(
                           quiz: questionList[number],
                           check: (val) => check(val),
-                          answerController: answerController,
                         )
                       : questionList[number].type == QuestionType.trueOrFalse
                           ? TrueOrFalse(
