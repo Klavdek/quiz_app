@@ -7,29 +7,55 @@ import 'package:quiz_app/widgets/types_of_quiz.dart/multi_answers.dart';
 import 'package:quiz_app/widgets/types_of_quiz.dart/one_answer.dart';
 import 'package:quiz_app/widgets/types_of_quiz.dart/true_or_false.dart';
 
-class Quiz extends StatefulWidget {
+class QuizWithTime extends StatefulWidget {
   final List<QuestionModel> questionList;
   final QuizModel quiz;
-  const Quiz({
+  const QuizWithTime({
     super.key,
     required this.questionList,
     required this.quiz,
   });
 
   @override
-  State<Quiz> createState() => _QuizState();
+  State<QuizWithTime> createState() => _QuizWithTimeState();
 }
 
-class _QuizState extends State<Quiz> {
+class _QuizWithTimeState extends State<QuizWithTime> {
   bool finish = false;
   late List<QuestionModel> questionList;
   int number = 0;
   int score = 0;
+  Timer? _timer;
+  late ValueNotifier<int> _counter;
 
   @override
   void initState() {
+    widget.quiz.withTime ? startTimer() : null;
     questionList = widget.questionList;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void startTimer() {
+    _counter = ValueNotifier<int>(widget.quiz.time);
+    _timer?.cancel();
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_counter.value == 0) {
+          check(false);
+        } else {
+          _counter.value--;
+          print(_counter.value);
+        }
+      },
+    );
   }
 
   void check(bool isCorrect) {
@@ -37,15 +63,18 @@ class _QuizState extends State<Quiz> {
       setState(() {
         score += 1;
         number += 1;
+        startTimer();
       });
     } else if (isCorrect == false) {
       setState(() {
         number += 1;
+        startTimer();
       });
     }
     if (number == widget.quiz.questionNum) {
       setState(() {
         finish = true;
+        _timer?.cancel();
       });
     }
   }
@@ -68,6 +97,18 @@ class _QuizState extends State<Quiz> {
               )
             : Column(
                 children: [
+                  ValueListenableBuilder<int>(
+                    builder: (BuildContext context, int value, Widget? child) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text('$value'),
+                        ],
+                      );
+                    },
+                    valueListenable: _counter,
+                    child: null,
+                  ),
                   Text('punkty: $score'),
                   questionList[number].type == QuestionType.oneAnswer
                       ? OneAnswer(

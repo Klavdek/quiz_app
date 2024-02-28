@@ -31,36 +31,47 @@ class _AddQuizScreenState extends State<AddQuizScreen> {
                   decoration:
                       const InputDecoration(label: Text('Wpisz tytuł quizu')),
                 ),
-                TextField(
-                  controller: numController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(label: Text('Wpisz czas')),
+                ListTile(
+                  title: const Text('Czy quiz ma być na czas?'),
+                  trailing: Switch(
+                    value: withTime,
+                    onChanged: (value) => setState(() {
+                      withTime = value;
+                    }),
+                  ),
                 ),
+                Visibility(
+                  visible: withTime,
+                  child: TextField(
+                    controller: numController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      label: Text('Wpisz czas w sekundach na jedno pytanie'),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
-          ListTile(
-            title: const Text('Czy quiz ma być na czas?'),
-            trailing: Switch(
-              value: withTime,
-              onChanged: (value) => setState(() {
-                withTime = value;
-              }),
-            ),
-          ),
-          OutlinedButton(onPressed: saveQuiz, child: const Text('Dodaj quiz')),
+          FilledButton(onPressed: saveQuiz, child: const Text('Dodaj quiz')),
         ],
       ),
     );
   }
 
-  saveQuiz() {
-    QuizModel quiz = QuizModel(
-        name: titleController.text,
-        questionNum: 0,
-        withTime: withTime,
-        time: int.tryParse(numController.text) ?? 0);
-    DbHelper().insertQuiz(quiz);
-    Navigator.pop(context);
+  void saveQuiz() {
+    if (titleController.text.isNotEmpty) {
+      QuizModel quiz = QuizModel(
+          name: titleController.text,
+          questionNum: 0,
+          withTime: withTime,
+          time: int.tryParse(numController.text) ?? 0);
+      DbHelper().insertQuiz(quiz);
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Wpisz tytuł'),
+      ));
+    }
   }
 }

@@ -5,8 +5,11 @@ class QuestionWidget extends StatelessWidget {
   final QuestionModel question;
   final VoidCallback delete;
 
-  const QuestionWidget(
-      {super.key, required this.question, required this.delete});
+  const QuestionWidget({
+    super.key,
+    required this.question,
+    required this.delete,
+  });
 
   @override
   Widget build(BuildContext context) {

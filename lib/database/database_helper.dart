@@ -61,7 +61,6 @@ class DbHelper {
     Map<String, dynamic> row = {
       name: quiz.name,
       questionNum: quiz.questionNum,
-      // type: quiz.type == QuizType.oneAnswer ? 'oneAnswer' : 'multiAnswers',
       withTime: quiz.withTime ? 1 : 0,
       time: quiz.time
     };
@@ -72,6 +71,7 @@ class DbHelper {
   Future<List<QuizModel>> queryQuizList() async {
     await init();
     List listRow = await _db.query(quizList);
+    print(listRow);
     List<QuizModel> quizes = [];
     for (var element in listRow) {
       final quiz = QuizModel(
@@ -151,6 +151,7 @@ class DbHelper {
     await init();
     List listRow = await _db
         .query(questionList, where: '$idQuiz = ?', whereArgs: [passId]);
+    print(listRow);
     List<QuestionModel> questions = []; //zamienić na .map
     for (var element in listRow) {
       final quiz = QuestionModel(
@@ -173,24 +174,25 @@ class DbHelper {
     return questions;
   }
 
-  Future<int> deleteQuestion(int idQuestion) async {
+  Future<int> deleteQuestion(int questionId, int quizId) async {
     await init();
     List num = await _db.query(
       quizList,
       columns: [questionNum],
       where: '"_id" = ?',
-      whereArgs: [idQuestion],
+      whereArgs: [quizId],
     );
+    print(num);
     await _db.update(
       quizList,
       {questionNum: num[0][questionNum] - 1},
       where: '$id = ?',
-      whereArgs: [idQuestion],
+      whereArgs: [quizId],
     );
     return await _db.delete(
       questionList,
       where: '$id = ?',
-      whereArgs: [idQuestion],
+      whereArgs: [questionId],
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:quiz_app/models/question_model.dart';
 import 'package:quiz_app/models/quiz_model.dart';
 import 'package:quiz_app/screens/add_question_screen.dart';
 import 'package:quiz_app/screens/quiz.dart';
+import 'package:quiz_app/screens/quiz_with_time.dart';
 import 'package:quiz_app/widgets/question_widget.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -19,12 +20,14 @@ class _QuizScreenState extends State<QuizScreen> {
   bool isLoading = true;
   late QuizModel quiz;
   late List<QuestionModel> questionList;
+  late List<QuestionModel> shuffleQuestionList;
 
   Future getQuizNQuestions() async {
     isLoading = true;
     quiz = await DbHelper().queryQuiz(widget.id);
     questionList = await DbHelper().queryQuestionList(widget.id);
-    questionList.shuffle();
+    shuffleQuestionList = List.of(questionList);
+    shuffleQuestionList.shuffle();
     setState(() {
       isLoading = false;
     });
@@ -36,8 +39,9 @@ class _QuizScreenState extends State<QuizScreen> {
         .then((value) => Navigator.pop(context));
   }
 
-  Future deleteQuestion(int id) async {
-    await DbHelper().deleteQuestion(id);
+  Future deleteQuestion(int questionId) async {
+    print('@@@@@@@@@@@@@@ $questionId');
+    await DbHelper().deleteQuestion(questionId, quiz.id!);
     await getQuizNQuestions();
   }
 
@@ -77,16 +81,24 @@ class _QuizScreenState extends State<QuizScreen> {
                             (value) => getQuizNQuestions(),
                           ),
                       child: const Text('Dodaj pytania')),
-                  OutlinedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Quiz(
-                              questionList: questionList,
-                              quiz: quiz,
-                            ),
-                          )),
-                      child: const Text('Rozpocznij quiz')),
+                  Visibility(
+                    visible: questionList.isNotEmpty,
+                    child: FilledButton(
+                        onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => quiz.withTime
+                                  ? QuizWithTime(
+                                      questionList: shuffleQuestionList,
+                                      quiz: quiz,
+                                    )
+                                  : Quiz(
+                                      questionList: shuffleQuestionList,
+                                      quiz: quiz,
+                                    ),
+                            )),
+                        child: const Text('Rozpocznij quiz')),
+                  ),
                   Expanded(
                     child: ListView.builder(
                       itemCount: questionList.length,
