@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/question_model.dart';
 import 'package:quiz_app/models/quiz_model.dart';
@@ -25,6 +23,7 @@ class _QuizState extends State<Quiz> {
   late List<QuestionModel> questionList;
   int number = 0;
   int score = 0;
+  List<Map> result = [];
 
   @override
   void initState() {
@@ -35,11 +34,14 @@ class _QuizState extends State<Quiz> {
   void check(bool isCorrect) {
     if (isCorrect == true) {
       setState(() {
+        result.add({'title': questionList[number].question, 'isCorrect': true});
         score += 1;
         number += 1;
       });
     } else if (isCorrect == false) {
       setState(() {
+        result
+            .add({'title': questionList[number].question, 'isCorrect': false});
         number += 1;
       });
     }
@@ -64,6 +66,23 @@ class _QuizState extends State<Quiz> {
                 children: [
                   const Text('Gratuluje'),
                   Text('Twoje punkty: $score'),
+                  const Text('Wyniki:'),
+                  Column(
+                    children: [
+                      ListView.builder(
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) => Card(
+                          color: result[index]['isCorrect']
+                              ? Colors.lightGreen
+                              : Colors.redAccent,
+                          child: ListTile(
+                            title: Text(result[index]['title']),
+                          ),
+                        ),
+                        itemCount: result.length,
+                      ),
+                    ],
+                  ),
                 ],
               )
             : Column(

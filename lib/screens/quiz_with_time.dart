@@ -27,6 +27,7 @@ class _QuizWithTimeState extends State<QuizWithTime> {
   int score = 0;
   Timer? _timer;
   late ValueNotifier<int> _counter;
+  List<Map> result = [];
 
   @override
   void initState() {
@@ -61,12 +62,15 @@ class _QuizWithTimeState extends State<QuizWithTime> {
   void check(bool isCorrect) {
     if (isCorrect == true) {
       setState(() {
+        result.add({'title': questionList[number].question, 'isCorrect': true});
         score += 1;
         number += 1;
         startTimer();
       });
     } else if (isCorrect == false) {
       setState(() {
+        result
+            .add({'title': questionList[number].question, 'isCorrect': false});
         number += 1;
         startTimer();
       });
@@ -93,6 +97,22 @@ class _QuizWithTimeState extends State<QuizWithTime> {
                 children: [
                   const Text('Gratuluje'),
                   Text('Twoje punkty: $score'),
+                  Column(
+                    children: [
+                      ListView.builder(
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) => Card(
+                          color: result[index]['isCorrect']
+                              ? Colors.lightGreen
+                              : Colors.redAccent,
+                          child: ListTile(
+                            title: Text(result[index]['title']),
+                          ),
+                        ),
+                        itemCount: result.length,
+                      ),
+                    ],
+                  ),
                 ],
               )
             : Column(

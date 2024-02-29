@@ -31,7 +31,7 @@ class TrueOrFalse extends StatelessWidget {
               onPressed: () => _check(true),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: Colors.redAccent, // foreground
+                backgroundColor: Colors.lightGreen, // foreground
               ),
               child: const Text(
                 'Prawda',
@@ -41,7 +41,7 @@ class TrueOrFalse extends StatelessWidget {
               onPressed: () => _check(false),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: Colors.lightGreen, // foreground
+                backgroundColor: Colors.redAccent, // foreground
               ),
               child: const Text('Fałsz'),
             ),
