@@ -66,52 +66,54 @@ class _QuizScreenState extends State<QuizScreen> {
               ],
             ),
             body: Center(
-              child: Column(
-                children: [
-                  Text('Liczba pytań: ${quiz.questionNum}'),
-                  Text('Czas: ${quiz.time} s'),
-                  OutlinedButton(
-                      onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AddQuestion(
-                                  id: quiz.id!,
-                                ),
-                              )).then(
-                            (value) => getQuizNQuestions(),
+              child: Column(children: [
+                Text('Liczba pytań: ${quiz.questionNum}'),
+                Visibility(
+                  visible: quiz.withTime,
+                  child: Text('Czas: ${quiz.time} s'),
+                ),
+                OutlinedButton(
+                    onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddQuestion(
+                              id: quiz.id!,
+                            ),
                           ),
-                      child: const Text('Dodaj pytania')),
-                  Visibility(
-                    visible: questionList.isNotEmpty,
-                    child: FilledButton(
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => quiz.withTime
-                                  ? QuizWithTime(
-                                      questionList: shuffleQuestionList,
-                                      quiz: quiz,
-                                    )
-                                  : Quiz(
-                                      questionList: shuffleQuestionList,
-                                      quiz: quiz,
-                                    ),
-                            )),
-                        child: const Text('Rozpocznij quiz')),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: questionList.length,
-                      itemBuilder: (context, index) => QuestionWidget(
-                        question: questionList[index],
-                        delete: () {
-                          deleteQuestion(questionList[index].id!);
-                        },
+                        ).then((value) => getQuizNQuestions()),
+                    child: const Text('Dodaj pytania')),
+                Visibility(
+                  visible: questionList.isNotEmpty,
+                  child: FilledButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => quiz.withTime
+                            ? QuizWithTime(
+                                questionList: shuffleQuestionList,
+                                quiz: quiz,
+                              )
+                            : Quiz(
+                                questionList: shuffleQuestionList,
+                                quiz: quiz,
+                              ),
                       ),
                     ),
-                  )
-                ],
-              ),
+                    child: const Text('Rozpocznij quiz'),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: questionList.length,
+                    itemBuilder: (context, index) => QuestionWidget(
+                      question: questionList[index],
+                      delete: () {
+                        deleteQuestion(questionList[index].id!);
+                      },
+                    ),
+                  ),
+                )
+              ]),
             ),
           );
   }
